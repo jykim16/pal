@@ -1,8 +1,8 @@
-import { ManifestManager } from "../data/manifest";
-import { MockLLMService } from "../data/llm";
-import { UserInteraction } from "../data/interaction";
+import { ManifestManager } from "../../data/manifest";
+import { MockLLMService } from "../../data/llm";
+import { UserInteraction } from "../../data/interaction";
 import { spawn } from "node:child_process";
-import type { LocalContext } from "../context";
+import type { LocalContext } from "../../context";
 
 interface ChatOptions {
   prompt: string;

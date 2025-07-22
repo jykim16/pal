@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import type { LocalContext } from './context.js';
-import { addChatCommand } from './chat/chatCommand.js';
+import { addChatCommand } from './commands/chat/chatCommand.js';
+import { addExecCommand } from './commands/exec/execCommand.js';
 
 function increaseVerbosity(dummyValue: string, previous: number) {
   return previous + 1;
@@ -13,5 +14,6 @@ export function createPal(context: LocalContext) {
     .version('0.0.0')
     .option('-v, --verbose', 'verbosity that can be increased', increaseVerbosity, 0)
   addChatCommand(pal, context)
+  addExecCommand(pal, context)
   return pal;
 }

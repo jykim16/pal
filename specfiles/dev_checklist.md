@@ -7,7 +7,7 @@ A list of tasks to guide the implementation of the pal CLI application based on 
 💬 pal chat Command
 [ ] Prompt Mode: Implement pal chat [prompt].
 
-[ ] Check if a relevant script exists by querying the .commandManifest.json.
+[x] Check if a relevant script exists by querying the .commandManifest.json.
 
 [ ] If a script exists, formulate a pal exec command and ask the user for confirmation.
 

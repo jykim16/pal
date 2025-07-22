@@ -1,6 +1,6 @@
 import type { Command } from "commander";
 import chatHandler from "./chatHandler";
-import type { LocalContext } from "../context";
+import type { LocalContext } from "../../context";
 
 
 export function addChatCommand(pal: Command, context: LocalContext):Command {
