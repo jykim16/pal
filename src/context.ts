@@ -24,9 +24,9 @@ function logLevel(verbosityCount: number):string {
   return 'error'
 }
 
-export function createLocalContext(verboseCount: number): LocalContext{
+export async function createLocalContext(verboseCount: number): Promise<LocalContext>{
   const logger = winston.createLogger({
-    silent: !!verboseCount,
+    silent: !verboseCount,
     level: logLevel(verboseCount),
     format: winston.format.combine(
       winston.format.simple(),
@@ -34,7 +34,7 @@ export function createLocalContext(verboseCount: number): LocalContext{
     ),
     transports: [new winston.transports.Console()],
   });
-  const manifestManager = new ManifestManager();
+  const manifestManager = await ManifestManager.create();
   const llmService = new MockLLMService();
   const userInteraction = new UserInteraction();
   let context: LocalContext = {

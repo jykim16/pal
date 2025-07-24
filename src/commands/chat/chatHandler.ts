@@ -102,7 +102,6 @@ async function handleNewScript(
 }
 
 async function executeScript(scriptPath: string, context: LocalContext): Promise<void> {
-  // TODO: implement pal exec --tmp and then run command here
   return new Promise((resolve, reject) => {
     const child = spawn("bash", [scriptPath], {
       stdio: "inherit",
@@ -128,7 +127,7 @@ async function saveScript(
 ): Promise<void> {
   try {
     await context.manifestManager.addCommand({
-      name: scriptName,
+      path: scriptName,
       description,
       tags: [],
     });

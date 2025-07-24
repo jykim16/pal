@@ -3,7 +3,7 @@
 import { createPal } from "./src/app"
 import { createLocalContext } from "./src/context"
 
-let context = createLocalContext(3)
+let context = await createLocalContext(3)
 try {
   const cli = createPal(context)
   await cli.parseAsync(process.argv)

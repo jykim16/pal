@@ -10,28 +10,26 @@ interface ExecOptions {
 
 export default async function execHandler(options: ExecOptions): Promise<void> {
   let { prompt, path, args, context } = options;
-  const {stdout} = context.process
-  if (prompt) {
-    if (!path) {
-      path = await findScript(prompt)
-      // find script based on prompt
-    }
-    if (!args) {
-      args = await setArgs(path, prompt)
-      //  set args based on prompt
+  const {stdout, stderr} = context.process
+  context.logger.info(`prompt is: ${prompt}`)
+  context.logger.info(`path is: ${path}`)
+  context.logger.info(`arg is: ${args}`)
+  if (prompt || !path) {
+    //TODO: finish from LLM: determine 'path' from 'prompt'
+    stderr.write(`prompt handling not implemented yet\n`)
+    return
+  }
+  const pathDetails = context.manifestManager.getCommandManifestEntry(path)
+  if (!pathDetails) {
+    stderr.write(`the command does not exist in path '${path}'\n`)
+    return
+  } else {
+    if (!Object.keys(pathDetails.parameters).length || args) {
+      stdout.write("Executing script\n")
+      await executeScript(pathDetails.path, args || "", context)
+      return
     }
   }
-  executeScript(path||"", args||"", context)
-}
-
-async function findScript(prompt: string):Promise<string> {
-  console.log("TODO find script")
-  return ""
-}
-
-async function setArgs(scriptPath: string, prompt: string) {
-  console.log("TODO set args")
-  return ""
 }
 
 async function executeScript(scriptPath: string, args: string, context: LocalContext): Promise<void> {
