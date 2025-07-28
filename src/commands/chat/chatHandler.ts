@@ -1,4 +1,4 @@
-import { ManifestManager } from "../../data/manifest";
+import { ManifestManager, type Command } from "../../data/manifest";
 import { MockLLMService } from "../../data/llm";
 import { UserInteraction } from "../../data/interaction";
 import { spawn } from "node:child_process";
@@ -35,7 +35,7 @@ async function handlePromptMode(
     // Check if a relevant script exists
     const relevantScripts = await context.manifestManager.findRelevantScripts(prompt);
     if (relevantScripts.length > 0) {
-      await handleExistingScript(relevantScripts[0], context);
+      await handleExistingScript(relevantScripts[0]!, context);
     } else {
       await handleNewScript(prompt, context);
     }
@@ -45,19 +45,17 @@ async function handlePromptMode(
 }
 
 async function handleExistingScript(
-  script: any,
+  script: Command,
   context: LocalContext
 ): Promise<void> {
-  const execCommand = `pal exec ${script.name}`;
+  const execCommand = `pal exec --path ${script.name}`;
   const message = `Found a relevant script: "${script.name}"
 Description: ${script.description}
 \nWould you like to execute: ${execCommand}`;
   const confirmed = await context.userInteraction.confirm(message);
   if (confirmed) {
     context.process.stdout.write(`Executing: ${execCommand}\n`);
-    // In a real implementation, this would call the exec command
-    // TODO: implement pal exec and then run command here
-    context.process.stdout.write(`[MOCK] Would execute: ${execCommand}\n`);
+    context.manifestManager.executeCommand(execCommand, context)
   } else {
     context.process.stdout.write("Execution cancelled.\n");
   }
@@ -72,9 +70,9 @@ async function handleNewScript(
     // Generate script using LLM
     const scriptContent = await context.llmService.generateScript(prompt);
     // Generate script name from prompt
-    const scriptName = generateScriptName(prompt);
+    const scriptName = context.manifestManager.generateScriptName(prompt);
     // Save to temporary directory
-    const scriptPath = await context.manifestManager.saveTemporaryScript(scriptName, scriptContent);
+    const scriptPath = await context.manifestManager.saveScript(scriptName, scriptContent, context);
     // Generate description
     const description = await context.llmService.generateDescription(scriptName, scriptContent);
     // Show the generated script
@@ -87,12 +85,6 @@ async function handleNewScript(
       context.process.stdout.write(`Executing script: ${scriptName}\n`);
       await executeScript(scriptPath, context);
       // Ask if user wants to save the script
-      const saveConfirmed = await context.userInteraction.confirm(
-        `Would you like to save this script permanently?`
-      );
-      if (saveConfirmed) {
-        await saveScript(scriptName, description, context);
-      }
     } else {
       context.process.stdout.write("Execution cancelled.\n");
     }
@@ -120,30 +112,3 @@ async function executeScript(scriptPath: string, context: LocalContext): Promise
   });
 }
 
-async function saveScript(
-  scriptName: string,
-  description: string,
-  context: LocalContext
-): Promise<void> {
-  try {
-    await context.manifestManager.addCommand({
-      path: scriptName,
-      description,
-      tags: [],
-    });
-    context.process.stdout.write(`Script "${scriptName}" saved successfully!\n`);
-  } catch (error) {
-    context.process.stderr.write(`Error saving script: ${error}\n`);
-  }
-}
-
-function generateScriptName(prompt: string): string {
-  const words = prompt.toLowerCase().split(/\s+/);
-  const filteredWords = words.filter(word => word.length > 0);
-  if (filteredWords.length === 0) return "defaultScript";
-  const firstWord = filteredWords[0];
-  const remainingWords = filteredWords.slice(1).map(word =>
-    word.charAt(0).toUpperCase() + word.slice(1)
-  );
-  return firstWord + remainingWords.join("");
-}

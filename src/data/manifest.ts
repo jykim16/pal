@@ -1,8 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import type { LocalContext } from "../context";
+import { spawn } from "node:child_process";
 
-export interface CommandManifestEntry {
+export interface Command {
+  name: string;
   path: string;
   description: string;
   parameters: Record<string, string>;
@@ -10,7 +13,7 @@ export interface CommandManifestEntry {
 }
 
 export interface CommandManifest {
-  commands: {[path:string]: CommandManifestEntry};
+  commands: {[path:string]: Command};
   lastUpdated: string;
 }
 export class ManifestManager {
@@ -31,7 +34,8 @@ export class ManifestManager {
     await this.ensureDirectories(commandDir);
     return new ManifestManager(commandDir, manifestPath, await this.readManifest(manifestPath));
   }
-  getCommandManifestEntry(path: string): CommandManifestEntry | undefined {
+
+  getCommandManifestEntry(path: string): Command | undefined {
     return this.manifest.commands[path]
   }
 
@@ -60,7 +64,7 @@ export class ManifestManager {
     );
   }
 
-  async findRelevantScripts(prompt: string): Promise<CommandManifestEntry[]> {
+  async findRelevantScripts(prompt: string): Promise<Command[]> {
     // Simple keyword matching for now - this could be enhanced with semantic search
       const promptLower = prompt.toLowerCase();
       const promptWords = promptLower.split(/\s+/);
@@ -70,17 +74,58 @@ export class ManifestManager {
     return relevantCommands.map(key => this.manifest.commands[key]!);
   }
 
-  async addCommand(entry: CommandManifestEntry): Promise<void> {
-    this.manifest.commands[entry.path] = entry;
+  async addCommand(entry: Command): Promise<void> {
+    this.manifest.commands[entry.name] = entry;
     await this.writeManifest(this.manifest);
   }
 
-  async saveTemporaryScript(
+  async executeCommand(command: string, context: LocalContext): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const child = spawn("bash", ['-c', command], {
+        stdio: "inherit",
+        cwd: context.process.cwd(),
+      });
+      child.on("close", (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`Script exited with code ${code}`));
+        }
+      });
+      child.on("error", (error) => {
+        reject(error);
+      });
+    });
+  }
+
+  async saveScript(
     scriptName: string,
-    content: string,
+    description: string,
+    context: LocalContext
   ): Promise<string> {
-    const scriptPath = path.join(this.commandDir, `${scriptName}.sh`);
-    await fs.promises.writeFile(scriptPath, content, { mode: 0o755 });
-    return scriptPath;
+    try {
+      await context.manifestManager.addCommand({
+        name: scriptName,
+        path: "bash/" + scriptName,
+        description,
+        parameters: {},
+        tags: [],
+      });
+      context.process.stdout.write(`Script "${scriptName}" saved successfully!\n`);
+    } catch (error) {
+      context.process.stderr.write(`Error saving script: ${error}\n`);
+    }
+    return "bash/" + scriptName;
+  }
+
+  generateScriptName(prompt: string): string {
+    const words = prompt.toLowerCase().split(/\s+/);
+    const filteredWords = words.filter(word => word.length > 0);
+    if (filteredWords.length === 0) return "defaultScript";
+    const firstWord = filteredWords[0];
+    const remainingWords = filteredWords.slice(1).map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    );
+    return "bash/" + firstWord + remainingWords.join("");
   }
 }

@@ -26,27 +26,8 @@ export default async function execHandler(options: ExecOptions): Promise<void> {
   } else {
     if (!Object.keys(pathDetails.parameters).length || args) {
       stdout.write("Executing script\n")
-      await executeScript(pathDetails.path, args || "", context)
+      await context.manifestManager.executeCommand(pathDetails.path, context)
       return
     }
   }
-}
-
-async function executeScript(scriptPath: string, args: string, context: LocalContext): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const child = spawn("bash", [scriptPath], {
-      stdio: "inherit",
-      cwd: context.process.cwd(),
-    });
-    child.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`Script exited with code ${code}`));
-      }
-    });
-    child.on("error", (error) => {
-      reject(error);
-    });
-  });
 }
