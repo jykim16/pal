@@ -19,14 +19,14 @@ export default async function execHandler(options: ExecOptions): Promise<void> {
     stderr.write(`prompt handling not implemented yet\n`)
     return
   }
-  const pathDetails = context.manifestManager.getCommandManifestEntry(path)
+  const pathDetails = context.scriptManager.getCommandManifestEntry(path)
   if (!pathDetails) {
     stderr.write(`the command does not exist in path '${path}'\n`)
     return
   } else {
     if (!Object.keys(pathDetails.parameters).length || args) {
       stdout.write("Executing script\n")
-      await context.manifestManager.executeCommand(pathDetails.path, context)
+      await context.scriptManager.executeCommand("~/.pal/command/" + pathDetails.path, context)
       return
     }
   }

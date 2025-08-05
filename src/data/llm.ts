@@ -1,65 +1,85 @@
-export interface LLMService {
-  generateScript(prompt: string): Promise<string>;
-  generateDescription(
-    scriptName: string,
-    scriptContent: string,
-  ): Promise<string>;
+// Message role type, following Anthropic pattern
+export type Role = "user" | "assistant" | "system";
+
+// Content type (can be extended to support more complex structures)
+export type Content = string;
+
+// Message type
+export interface Message {
+  role: Role;
+  content: Content;
 }
 
+// RequestParams for LLM generation
+export interface RequestParams {
+  model: string;
+  temperature?: number;
+  max_tokens?: number;
+}
+
+export interface LLMService {
+  generate(messages: Message[], requestParams: RequestParams): Promise<Message>;
+  generateStructured<T>(messages: Message[], requestParams: RequestParams): Promise<T>;
+}
+
+import { GoogleGenAI } from "@google/genai";
+
 export class MockLLMService implements LLMService {
-  async generateScript(prompt: string): Promise<string> {
-    // Mock implementation - in a real implementation, this would call an actual LLM API
-    const scriptName = this.generateScriptName(prompt);
-
-    return `#!/bin/bash
-# Generated script for: ${prompt}
-# Script name: ${scriptName}
-
-echo "Executing: ${prompt}"
-echo "This is a mock script generated for demonstration purposes."
-echo "In a real implementation, this would contain the actual logic for: ${prompt}"
-
-# Example logic based on common patterns
-if [[ "${prompt.toLowerCase()}" == *"list"* ]]; then
-    echo "Listing files..."
-    ls -la
-elif [[ "${prompt.toLowerCase()}" == *"search"* ]]; then
-    echo "Searching..."
-    find . -name "*.txt" 2>/dev/null
-elif [[ "${prompt.toLowerCase()}" == *"backup"* ]]; then
-    echo "Creating backup..."
-    cp -r . ../backup_$(date +%Y%m%d_%H%M%S)
-else
-    echo "Default action for: ${prompt}"
-fi
-
-echo "Script execution completed."
-`;
+  async generate(messages: Message[], requestParams: RequestParams): Promise<Message> {
+    // Return a mock assistant message
+    return {
+      role: "assistant",
+      content: `Mock response to: ${messages.map(m => m.content).join(" ")}`
+    };
   }
 
-  async generateDescription(
-    scriptName: string,
-    scriptContent: string,
-  ): Promise<string> {
-    // Mock implementation - in a real implementation, this would call an actual LLM API
-    return `Script to ${scriptName
-      .replace(/([A-Z])/g, " $1")
-      .toLowerCase()
-      .trim()}`;
+  async generateStructured<T>(messages: Message[], requestParams: RequestParams): Promise<T> {
+    // Return an empty object as T (not type-safe, but fine for a mock)
+    return {} as T;
+  }
+}
+
+export class GeminiLLM implements LLMService {
+  private ai: GoogleGenAI;
+
+  constructor() {
+    this.ai = new GoogleGenAI({}); // Uses GEMINI_API_KEY from env
   }
 
-  private generateScriptName(prompt: string): string {
-    // Convert prompt to a camelCase script name
-    const words = prompt.toLowerCase().split(/\s+/);
-    const filteredWords = words.filter((word) => word.length > 0);
+  private toGeminiContents(messages: Message[]): any[] {
+    // Gemini expects an array of { role, parts: [{ text }] }
+    return messages.map((msg) => ({
+      role: msg.role,
+      parts: [{ text: msg.content }],
+    }));
+  }
 
-    if (filteredWords.length === 0) return "defaultScript";
+  async generate(messages: Message[], requestParams: RequestParams): Promise<Message> {
+    const { model, temperature, max_tokens } = requestParams;
+    const contents = this.toGeminiContents(messages);
+    const generationConfig: any = {};
+    if (typeof temperature === "number") generationConfig.temperature = temperature;
+    if (typeof max_tokens === "number") generationConfig.maxOutputTokens = max_tokens;
+    const response = await this.ai.models.generateContent({
+      model,
+      contents,
+      ...(Object.keys(generationConfig).length ? { generationConfig } : {}),
+    });
+    // Gemini returns candidates[0].content.parts[0].text
+    const text = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    return {
+      role: "assistant",
+      content: text,
+    };
+  }
 
-    const firstWord = filteredWords[0];
-    const remainingWords = filteredWords
-      .slice(1)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1));
-
-    return firstWord + remainingWords.join("");
+  async generateStructured<T>(messages: Message[], requestParams: RequestParams): Promise<T> {
+    // For structured output, we expect the user to prompt Gemini to return JSON, then parse it
+    const msg = await this.generate(messages, requestParams);
+    try {
+      return JSON.parse(msg.content) as T;
+    } catch (e) {
+      throw new Error("Failed to parse structured output from Gemini: " + e);
+    }
   }
 }

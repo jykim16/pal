@@ -1,4 +1,4 @@
-import { ManifestManager, type Command } from "../../data/manifest";
+import { ScriptManager, type Command } from "../../data/scriptManager";
 import { MockLLMService } from "../../data/llm";
 import { UserInteraction } from "../../data/interaction";
 import { spawn } from "node:child_process";
@@ -33,7 +33,7 @@ async function handlePromptMode(
 ): Promise<void> {
   try {
     // Check if a relevant script exists
-    const relevantScripts = await context.manifestManager.findRelevantScripts(prompt);
+    const relevantScripts = await context.scriptManager.findRelevantScripts(prompt);
     if (relevantScripts.length > 0) {
       await handleExistingScript(relevantScripts[0]!, context);
     } else {
@@ -55,7 +55,7 @@ Description: ${script.description}
   const confirmed = await context.userInteraction.confirm(message);
   if (confirmed) {
     context.process.stdout.write(`Executing: ${execCommand}\n`);
-    context.manifestManager.executeCommand(execCommand, context)
+    context.scriptManager.executeCommand(execCommand, context)
   } else {
     context.process.stdout.write("Execution cancelled.\n");
   }
@@ -68,22 +68,23 @@ async function handleNewScript(
   context.process.stdout.write("No relevant script found. Generating a new script...\n");
   try {
     // Generate script using LLM
-    const scriptContent = await context.llmService.generateScript(prompt);
+    const generatePrompt = `Generate a bash script that will fulfill the following request:${prompt}. Provide the script's content as plain text, with no markdown or additional information. Only provide the script's contents, without any \`\`\`bash or other formatting.`;
+    const scriptContent = await context.llmService.generate([{role: "user", content: generatePrompt}], {model: "gemini-2.0-flash"});
     // Generate script name from prompt
-    const scriptName = context.manifestManager.generateScriptName(prompt);
+    const scriptName = context.scriptManager.generateScriptName(prompt);
+    const describeScript = `Describe this script in a few sentences: ${scriptContent.content}`;
+    const scriptDescription = await context.llmService.generate([{role: "user", content: describeScript}], {model: "gemini-2.0-flash"});
     // Save to temporary directory
-    const scriptPath = await context.manifestManager.saveScript(scriptName, scriptContent, context);
-    // Generate description
-    const description = await context.llmService.generateDescription(scriptName, scriptContent);
+    const scriptPath = await context.scriptManager.saveScript(scriptName, scriptDescription.content, scriptContent.content, context);
     // Show the generated script
-    context.process.stdout.write(`\nGenerated script:\nName: ${scriptName}\nDescription: ${description}\nPath: ${scriptPath}\n\nScript content:\n${scriptContent}\n`);
+    context.process.stdout.write(`\nGenerated script:\nName: ${scriptName}\nDescription: ${scriptDescription.content}\nPath: ${scriptPath}\n\nScript content:\n${scriptContent.content}\n`);
     // Ask for confirmation to execute
     const confirmed = await context.userInteraction.confirm(
       `Would you like to execute this generated script?`
     );
     if (confirmed) {
       context.process.stdout.write(`Executing script: ${scriptName}\n`);
-      await executeScript(scriptPath, context);
+      await context.scriptManager.executeCommand("~/.pal/command/" + scriptPath, context);
       // Ask if user wants to save the script
     } else {
       context.process.stdout.write("Execution cancelled.\n");

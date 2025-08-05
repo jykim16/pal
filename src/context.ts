@@ -1,14 +1,14 @@
 import winston, { Logger, verbose } from 'winston';
-import { ManifestManager } from './data/manifest';
-import { MockLLMService } from './data/llm';
+import { ScriptManager } from './data/scriptManager';
+import { type LLMService, GeminiLLM } from './data/llm';
 import { UserInteraction } from './data/interaction';
 
 
 export interface LocalContext {
   readonly process: NodeJS.Process;
   readonly logger: Logger;
-  readonly manifestManager: ManifestManager;
-  readonly llmService: MockLLMService;
+  readonly scriptManager: ScriptManager;
+  readonly llmService: LLMService;
   readonly userInteraction: UserInteraction;
   close: Function;
 }
@@ -34,13 +34,13 @@ export async function createLocalContext(verboseCount: number): Promise<LocalCon
     ),
     transports: [new winston.transports.Console()],
   });
-  const manifestManager = await ManifestManager.create();
-  const llmService = new MockLLMService();
+  const scriptManager = await ScriptManager.create();
+  const llmService = new GeminiLLM();
   const userInteraction = new UserInteraction();
   let context: LocalContext = {
     process,
     logger,
-    manifestManager,
+    scriptManager,
     llmService,
     userInteraction,
     close: () => {

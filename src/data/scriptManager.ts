@@ -16,7 +16,7 @@ export interface CommandManifest {
   commands: {[path:string]: Command};
   lastUpdated: string;
 }
-export class ManifestManager {
+export class ScriptManager {
   private readonly manifestPath: string;
   private readonly commandDir: string;
   private manifest: CommandManifest;
@@ -27,12 +27,12 @@ export class ManifestManager {
     this.manifest = manifest;
   }
 
-  public static async create(): Promise<ManifestManager> {
+  public static async create(): Promise<ScriptManager> {
     const homeDir = os.homedir();
     const commandDir = path.join(homeDir, ".pal", "command");
     const manifestPath = path.join(commandDir, ".commandManifest.json");
     await this.ensureDirectories(commandDir);
-    return new ManifestManager(commandDir, manifestPath, await this.readManifest(manifestPath));
+    return new ScriptManager(commandDir, manifestPath, await this.readManifest(manifestPath));
   }
 
   getCommandManifestEntry(path: string): Command | undefined {
@@ -101,12 +101,14 @@ export class ManifestManager {
   async saveScript(
     scriptName: string,
     description: string,
+    scriptContent: string,
     context: LocalContext
   ): Promise<string> {
     try {
-      await context.manifestManager.addCommand({
+      await fs.promises.writeFile(path.join(this.commandDir, scriptName), scriptContent, {mode: 0o755});
+      await context.scriptManager.addCommand({
         name: scriptName,
-        path: "bash/" + scriptName,
+        path: scriptName,
         description,
         parameters: {},
         tags: [],
@@ -115,7 +117,7 @@ export class ManifestManager {
     } catch (error) {
       context.process.stderr.write(`Error saving script: ${error}\n`);
     }
-    return "bash/" + scriptName;
+    return scriptName;
   }
 
   generateScriptName(prompt: string): string {

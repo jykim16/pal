@@ -3,16 +3,24 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "test": "jest"
+  },
   "bin": {
     "pal": "index.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/jest": "^30.0.0",
+    "dotenv": "^17.2.1",
+    "jest": "^30.0.5",
+    "ts-jest": "^29.4.1"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
+    "@google/genai": "^1.12.0",
     "commander": "^14.0.0",
     "winston": "^3.17.0"
   }
