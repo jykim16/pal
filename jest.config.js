@@ -7,4 +7,9 @@ export default {
     "^.+\\.ts$": ["ts-jest", { useESM: true }],
   },
   setupFiles: ["<rootDir>/jest.setup.ts"],
+  testMatch: ["<rootDir>/tests/**/*.test.ts"],
+  collectCoverageFrom: [
+    "src/**/*.ts",
+    "!src/**/*.d.ts"
+  ]
 };
