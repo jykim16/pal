@@ -1,4 +1,4 @@
-name: Build
+name: Build and Unit Test
 
 on:
   pull_request:
@@ -6,10 +6,10 @@ on:
       - main  # Specify the branch your PRs target
 
 jobs:
-  build:
+  build_and_run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
       - run: bun install
-      - run: npm run preflight
+      - run: npm run test
