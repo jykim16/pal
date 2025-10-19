@@ -39,6 +39,10 @@ export class ScriptManager {
     return this.manifest.commands[path]
   }
 
+  getAllCommands(): Command[] {
+    return Object.values(this.manifest.commands);
+  }
+
   private static async ensureDirectories(commandDir: string): Promise<void> {
     await fs.promises.mkdir(commandDir, { recursive: true });
   }
