@@ -25,7 +25,9 @@ export default async function execHandler(options: ExecOptions): Promise<void> {
   } else {
     if (!Object.keys(pathDetails.parameters).length || args) {
       stdout.write("Executing script\n")
-      await context.scriptManager.executeCommand("~/.pal/command/" + pathDetails.path, context)
+      const scriptPath = "~/.pal/command/" + pathDetails.path
+      const command = args ? `${scriptPath} ${args}` : scriptPath
+      await context.scriptManager.executeCommand(command, context)
       return
     }
   }
