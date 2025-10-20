@@ -1,7 +1,4 @@
-import { ScriptManager, type Command } from "../../data/scriptManager";
-import { MockLLMService } from "../../data/llm";
-import { UserInteraction } from "../../data/interaction";
-import { spawn } from "node:child_process";
+import { type Command } from "../../data/scriptManager";
 import type { LocalContext } from "../../context";
 
 interface ChatOptions {
@@ -93,23 +90,3 @@ async function handleNewScript(
     context.process.stderr.write(`Error generating script: ${error}\n`);
   }
 }
-
-async function executeScript(scriptPath: string, context: LocalContext): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const child = spawn("bash", [scriptPath], {
-      stdio: "inherit",
-      cwd: context.process.cwd(),
-    });
-    child.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`Script exited with code ${code}`));
-      }
-    });
-    child.on("error", (error) => {
-      reject(error);
-    });
-  });
-}
-
