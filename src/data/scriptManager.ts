@@ -68,14 +68,37 @@ export class ScriptManager {
     );
   }
 
-  async findRelevantScripts(prompt: string): Promise<Command[]> {
-    // Simple keyword matching for now - this could be enhanced with semantic search
+  async findRelevantScripts(prompt: string, llmService: any): Promise<Command[]> {
+    const commands = this.getAllCommands();
+    if (commands.length === 0) return [];
+
+    const commandSummary = commands.map(cmd => 
+      `Name: ${cmd.name}, Description: ${cmd.description}`
+    ).join('\n');
+
+    const analysisPrompt = `Given this user request: "${prompt}"
+
+Available scripts:
+${commandSummary}
+
+Return a JSON array of script names that are relevant to the user's request. Only include scripts that directly match the user's intent. If no scripts are relevant, return an empty array.
+
+Example response: ["scriptName1", "scriptName2"] or []`;
+
+    try {
+      const relevantNames = await llmService.generateStructured([
+        { role: "user", content: analysisPrompt }
+      ], { model: "gemini-2.0-flash" });
+
+      return commands.filter(cmd => relevantNames.includes(cmd.name));
+    } catch (error) {
+      // Fallback to simple matching if LLM fails
       const promptLower = prompt.toLowerCase();
-      const promptWords = promptLower.split(/\s+/);
-    const relevantCommands = Object.keys(this.manifest.commands).filter((path) => {
-      return promptWords.some((word) => path.includes(word));
-    });
-    return relevantCommands.map(key => this.manifest.commands[key]!);
+      return commands.filter(cmd => 
+        cmd.name.toLowerCase().includes(promptLower) || 
+        cmd.description.toLowerCase().includes(promptLower)
+      );
+    }
   }
 
   async addCommand(entry: Command): Promise<void> {
