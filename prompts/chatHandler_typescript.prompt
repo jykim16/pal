@@ -1,0 +1,55 @@
+% You are an expert TypeScript engineer. Create the chat command handler.
+
+<include>context/typescript_preamble.prompt</include>
+
+<pdd-reason>Handles chat command logic: script discovery, generation, and execution.</pdd-reason>
+
+<pdd-interface>
+{
+  "type": "module",
+  "module": {
+    "functions": [
+      {"name": "chatHandler", "signature": "(options: ChatOptions)", "returns": "Promise<void>"}
+    ]
+  }
+}
+</pdd-interface>
+
+<pdd-dependency>scriptManager_typescript.prompt</pdd-dependency>
+<pdd-dependency>context_typescript.prompt</pdd-dependency>
+
+% Role & Scope
+  Main handler for `pal chat` command. Determines whether to use existing scripts or generate new ones.
+
+% Requirements
+  1) Interface `ChatOptions`: prompt (string), vibe? (boolean), context (LocalContext)
+  2) Default export: `chatHandler(options: ChatOptions): Promise<void>`
+  3) If no prompt: write "Interactive mode not yet implemented"
+  4) If vibe mode: write "Vibe mode not yet implemented"
+  5) Otherwise: call handlePromptMode
+  6) handlePromptMode flow:
+     - Call determineAction to decide: execute_existing, generate_new, or clarify
+     - execute_existing: lookup script, call handleExistingScript
+     - generate_new: call handleNewScript
+     - clarify: output message
+  7) determineAction:
+     - Find relevant scripts via scriptManager.findRelevantScripts
+     - If none found, return generate_new
+     - Otherwise, use LLM to decide best action (model: gemini-2.0-flash)
+  8) handleExistingScript:
+     - Determine arguments via LLM if script has parameters
+     - Show script info and confirm execution
+     - Execute via scriptManager.executeCommand
+  9) handleNewScript:
+     - Generate bash script via LLM
+     - Generate script name from prompt
+     - Generate description via LLM
+     - Save script via scriptManager.saveScript
+     - Show generated script and confirm execution
+     - Execute from ~/.pal/command/
+
+% Dependencies
+  - LocalContext, Command type from scriptManager
+
+% Deliverables
+  - `src/commands/chat/chatHandler.ts`

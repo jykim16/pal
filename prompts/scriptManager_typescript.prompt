@@ -1,0 +1,49 @@
+% You are an expert TypeScript engineer. Create the ScriptManager for script storage and execution.
+
+<include>context/typescript_preamble.prompt</include>
+
+<pdd-reason>Manages script persistence, manifest tracking, and command execution.</pdd-reason>
+
+<pdd-interface>
+{
+  "type": "module",
+  "module": {
+    "functions": [
+      {"name": "create", "signature": "()", "returns": "Promise<ScriptManager>"},
+      {"name": "getCommandManifestEntry", "signature": "(path: string)", "returns": "Command | undefined"},
+      {"name": "getAllCommands", "signature": "()", "returns": "Command[]"},
+      {"name": "findRelevantScripts", "signature": "(prompt: string, llmService: any)", "returns": "Promise<Command[]>"},
+      {"name": "addCommand", "signature": "(entry: Command)", "returns": "Promise<void>"},
+      {"name": "executeCommand", "signature": "(command: string, context: LocalContext)", "returns": "Promise<void>"},
+      {"name": "saveScript", "signature": "(scriptName: string, description: string, scriptContent: string, context: LocalContext)", "returns": "Promise<string>"},
+      {"name": "generateScriptName", "signature": "(prompt: string)", "returns": "string"}
+    ]
+  }
+}
+</pdd-interface>
+
+% Role & Scope
+  Manages script storage in ~/.pal/command/, manifest tracking, and bash execution.
+
+% Requirements
+  1) Interface `Command`: name, path, description, parameters (Record<string,string>), tags?
+  2) Interface `CommandManifest`: commands (keyed by path), lastUpdated
+  3) Class `ScriptManager` (private constructor, use static create()):
+     - Storage: ~/.pal/command/
+     - Manifest: ~/.pal/command/.commandManifest.json
+  4) Methods:
+     - create(): async factory, ensures directories exist
+     - getCommandManifestEntry(path): lookup by path
+     - getAllCommands(): return all commands
+     - findRelevantScripts(prompt, llmService): use LLM to find matching scripts, fallback to string matching
+     - addCommand(entry): add to manifest and persist
+     - executeCommand(command, context): spawn bash with inherited stdio
+     - saveScript(name, desc, content, context): write file (mode 0o755), add to manifest
+     - generateScriptName(prompt): convert prompt to camelCase path like "bash/listFiles"
+
+% Dependencies
+  - Node fs, path, os, child_process (spawn)
+  - LocalContext type
+
+% Deliverables
+  - `src/data/scriptManager.ts`

@@ -1,0 +1,37 @@
+% You are an expert TypeScript engineer. Create the CLI application factory for `pal`.
+
+<include>context/typescript_preamble.prompt</include>
+
+<pdd-reason>Factory function that assembles the Commander.js CLI with all subcommands.</pdd-reason>
+
+<pdd-interface>
+{
+  "type": "module",
+  "module": {
+    "functions": [
+      {"name": "createPal", "signature": "(context: LocalContext)", "returns": "Command"}
+    ]
+  }
+}
+</pdd-interface>
+
+<pdd-dependency>context_typescript.prompt</pdd-dependency>
+
+% Role & Scope
+  Factory that creates and configures the Commander.js CLI instance with all subcommands.
+
+% Requirements
+  1) Function: `createPal(context: LocalContext): Command`
+  2) CLI name: "pal", description: "Your agentic terminal friend"
+  3) Version: "0.0.0"
+  4) Global option: `-v, --verbose` (stackable verbosity counter)
+  5) Register subcommands: chat, exec, list
+  6) Return configured Command instance
+
+% Dependencies
+  - Commander.js `Command`
+  - `LocalContext` type from `./context.js`
+  - `addChatCommand`, `addExecCommand`, `addListCommand` from respective command modules
+
+% Deliverables
+  - `src/app.ts`

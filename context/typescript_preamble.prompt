@@ -1,0 +1,29 @@
+% TypeScript/Bun Project Conventions
+
+% Style
+  - Use TypeScript strict mode
+  - Prefer `type` over `interface` for simple types
+  - Use explicit return types on exported functions
+  - Use async/await over raw Promises
+  - Prefer `const` over `let`; avoid `var`
+
+% Imports
+  - Use ES module syntax with `.js` extensions for local imports
+  - Use `type` imports for type-only imports
+  - Group imports: external packages, then local modules
+
+% Error Handling
+  - Use try/catch for async operations
+  - Write errors to stderr, output to stdout
+  - Never swallow errors silently
+
+% Naming
+  - camelCase for variables and functions
+  - PascalCase for classes and types
+  - Descriptive names; avoid abbreviations
+
+% Dependencies
+  - Runtime: Bun
+  - CLI framework: Commander.js
+  - Logging: Winston
+  - LLM: Google GenAI SDK

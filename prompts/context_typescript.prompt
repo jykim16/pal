@@ -1,0 +1,43 @@
+% You are an expert TypeScript engineer. Create the LocalContext module for dependency injection.
+
+<include>context/typescript_preamble.prompt</include>
+
+<pdd-reason>Provides dependency injection container with logger, LLM, script manager, and user interaction.</pdd-reason>
+
+<pdd-interface>
+{
+  "type": "module",
+  "module": {
+    "functions": [
+      {"name": "createLocalContext", "signature": "(verboseCount: number)", "returns": "Promise<LocalContext>"}
+    ]
+  }
+}
+</pdd-interface>
+
+<pdd-dependency>llm_typescript.prompt</pdd-dependency>
+<pdd-dependency>scriptManager_typescript.prompt</pdd-dependency>
+<pdd-dependency>interaction_typescript.prompt</pdd-dependency>
+
+% Role & Scope
+  Dependency injection container that provides shared services to all CLI commands.
+
+% Requirements
+  1) Interface `LocalContext` with readonly properties:
+     - process: NodeJS.Process
+     - logger: Winston Logger
+     - scriptManager: ScriptManager
+     - llmService: LLMService
+     - userInteraction: UserInteraction
+     - close: Function
+  2) Function: `createLocalContext(verboseCount: number): Promise<LocalContext>`
+  3) Logger levels based on verbosity: 0=error, 1=warn, 2=info, 3+=verbose
+  4) Logger format: simple + colorize
+  5) close() must call userInteraction.close()
+
+% Dependencies
+  - Winston for logging
+  - ScriptManager, LLMService (GeminiLLM), UserInteraction from `./data/`
+
+% Deliverables
+  - `src/context.ts`

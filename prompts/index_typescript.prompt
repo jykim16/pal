@@ -1,0 +1,26 @@
+% You are an expert TypeScript engineer. Create the main CLI entry point for the `pal` application.
+
+<include>context/typescript_preamble.prompt</include>
+
+<pdd-reason>Main entry point that initializes context and parses CLI commands.</pdd-reason>
+
+<pdd-dependency>app_typescript.prompt</pdd-dependency>
+<pdd-dependency>context_typescript.prompt</pdd-dependency>
+
+% Role & Scope
+  Executable entry point that bootstraps the pal CLI application.
+
+% Requirements
+  1) Shebang: `#!/usr/bin/env bun`
+  2) Create LocalContext with verbosity level 3
+  3) Create CLI via `createPal(context)`
+  4) Parse `process.argv` asynchronously
+  5) Log errors via context.logger.error
+  6) Always call `context.close()` in finally block
+
+% Dependencies
+  - `createPal` from `./src/app`
+  - `createLocalContext` from `./src/context`
+
+% Deliverables
+  - `index.ts` at project root

@@ -1,0 +1,36 @@
+% You are an expert TypeScript engineer. Create the list command registration.
+
+<include>context/typescript_preamble.prompt</include>
+
+<pdd-reason>Registers the `pal list` subcommand with Commander.js.</pdd-reason>
+
+<pdd-interface>
+{
+  "type": "module",
+  "module": {
+    "functions": [
+      {"name": "addListCommand", "signature": "(pal: Command, context: LocalContext)", "returns": "Command"}
+    ]
+  }
+}
+</pdd-interface>
+
+<pdd-dependency>listHandler_typescript.prompt</pdd-dependency>
+<pdd-dependency>context_typescript.prompt</pdd-dependency>
+
+% Role & Scope
+  Registers the `list` subcommand on the Commander.js CLI.
+
+% Requirements
+  1) Function: `addListCommand(pal: Command, context: LocalContext): Command`
+  2) Command name: "list"
+  3) Description: "List all saved scripts with descriptions"
+  4) Action: call listHandler with { context }
+
+% Dependencies
+  - Commander.js Command type
+  - listHandler from ./listHandler
+  - LocalContext type
+
+% Deliverables
+  - `src/commands/list/listCommand.ts`

@@ -1,0 +1,42 @@
+% You are an expert TypeScript engineer. Create the LLM service abstraction layer.
+
+<include>context/typescript_preamble.prompt</include>
+
+<pdd-reason>Abstracts LLM interactions with support for text and structured JSON generation.</pdd-reason>
+
+<pdd-interface>
+{
+  "type": "module",
+  "module": {
+    "functions": [
+      {"name": "generate", "signature": "(messages: Message[], requestParams: RequestParams)", "returns": "Promise<Message>"},
+      {"name": "generateStructured", "signature": "<T>(messages: Message[], requestParams: RequestParams)", "returns": "Promise<T>"}
+    ]
+  }
+}
+</pdd-interface>
+
+% Role & Scope
+  LLM service interface and implementations for text/structured generation.
+
+% Requirements
+  1) Types:
+     - `Role`: "user" | "assistant" | "system"
+     - `Content`: string
+     - `Message`: { role: Role, content: Content }
+     - `RequestParams`: { model: string, temperature?: number, max_tokens?: number }
+  2) Interface `LLMService`:
+     - generate(messages, requestParams): Promise<Message>
+     - generateStructured<T>(messages, requestParams): Promise<T>
+  3) Class `MockLLMService`: returns mock responses for testing
+  4) Class `GeminiLLM`:
+     - Uses @google/genai SDK
+     - Reads API key from GEMINI_API_KEY env var
+     - Converts messages to Gemini format: { role, parts: [{ text }] }
+     - generateStructured parses JSON from response
+
+% Dependencies
+  - @google/genai SDK
+
+% Deliverables
+  - `src/data/llm.ts`

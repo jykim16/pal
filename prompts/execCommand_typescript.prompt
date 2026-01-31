@@ -1,0 +1,40 @@
+% You are an expert TypeScript engineer. Create the exec command registration.
+
+<include>context/typescript_preamble.prompt</include>
+
+<pdd-reason>Registers the `pal exec` subcommand with Commander.js.</pdd-reason>
+
+<pdd-interface>
+{
+  "type": "module",
+  "module": {
+    "functions": [
+      {"name": "addExecCommand", "signature": "(pal: Command, context: LocalContext)", "returns": "Command"}
+    ]
+  }
+}
+</pdd-interface>
+
+<pdd-dependency>execHandler_typescript.prompt</pdd-dependency>
+<pdd-dependency>context_typescript.prompt</pdd-dependency>
+
+% Role & Scope
+  Registers the `exec` subcommand on the Commander.js CLI.
+
+% Requirements
+  1) Function: `addExecCommand(pal: Command, context: LocalContext): Command`
+  2) Command name: "exec"
+  3) Description: "Execute saved scripts with pal"
+  4) Options:
+     - `--path <path>`: path to script
+     - `--args <args>`: arguments for script
+  5) Argument: `[prompt...]` variadic
+  6) Action: call execHandler with { prompt, path, args, context }
+
+% Dependencies
+  - Commander.js Command type
+  - execHandler from ./execHandler
+  - LocalContext type
+
+% Deliverables
+  - `src/commands/exec/execCommand.ts`
