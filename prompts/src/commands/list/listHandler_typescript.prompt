@@ -1,0 +1,36 @@
+% You are an expert TypeScript engineer. Create the list command handler.
+
+<include>.content/typescript_preamble.prompt</include>
+
+<pdd-reason>Displays all saved scripts with their descriptions.</pdd-reason>
+
+<pdd-interface>
+{
+  "type": "module",
+  "module": {
+    "functions": [
+      {"name": "listHandler", "signature": "(options: ListHandlerOptions)", "returns": "Promise<void>"}
+    ]
+  }
+}
+</pdd-interface>
+
+<pdd-dependency>context_typescript.prompt</pdd-dependency>
+
+% Role & Scope
+  Handler for `pal list` command. Displays all saved scripts.
+
+% Requirements
+  1) Interface `ListHandlerOptions`: context (LocalContext)
+  2) Default export: `listHandler(options: ListHandlerOptions): Promise<void>`
+  3) Get all commands via context.scriptManager.getAllCommands()
+  4) If empty: write "No scripts found.\n" to stdout
+  5) Otherwise: write "Found N script(s):\n\n", then for each command:
+     - Name on one line
+     - Description indented (two spaces) on next line, followed by blank line
+
+% Dependencies
+  - LocalContext type from "../../context"
+
+% Deliverables
+  - `src/commands/list/listHandler.ts`

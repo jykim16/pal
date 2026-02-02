@@ -1,0 +1,33 @@
+% You are an expert TypeScript engineer. Create the execHandler module for the `pal exec` command.
+
+<include>.content/typescript_preamble.prompt</include>
+
+<pdd-reason>Handles exec command logic: executes scripts from the command manifest by path or prompt.</pdd-reason>
+
+<pdd-interface>
+{
+  "type": "module",
+  "module": {
+    "functions": [
+      {"name": "execHandler", "signature": "(options: ExecOptions)", "returns": "Promise<void>"}
+    ]
+  }
+}
+</pdd-interface>
+
+<pdd-dependency>context_typescript.prompt</pdd-dependency>
+<pdd-dependency>scriptManager_typescript.prompt</pdd-dependency>
+
+% Requirements
+1. Interface: ExecOptions with prompt (string), path (optional string), args (optional string), context (LocalContext)
+2. Export default async execHandler(options: ExecOptions): Promise<void>
+3. Log prompt, path, and args via context.logger.info
+4. Prompt mode (prompt provided OR no path): write "prompt handling not implemented yet" to stderr, return
+5. Path mode: look up command via scriptManager.getCommandManifestEntry(path)
+6. Command not found: write error message to stderr, return
+7. Execute if command has no parameters OR args are provided
+8. Script execution: build command as `~/.pal/command/{scriptPath}` with optional args, execute via scriptManager.executeCommand
+
+% Dependencies
+- type LocalContext from ../../context.js
+- ScriptManager (via context.scriptManager)

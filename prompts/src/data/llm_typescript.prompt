@@ -1,0 +1,12 @@
+% You are an expert TypeScript engineer. Create the LLM service abstraction layer with type definitions and implementations.
+
+% Requirements
+1. Types: Role ("user" | "assistant" | "system"), Content (string), Message {role, content}, RequestParams {model, temperature?, max_tokens?}
+2. Interface: LLMService with generate(messages, params) → Promise<Message> and generateStructured<T>(messages, params) → Promise<T>
+3. Class: MockLLMService implementing LLMService - returns mock response echoing input
+4. Class: GeminiLLM implementing LLMService using @google/genai SDK
+5. GeminiLLM.generate: convert messages to Gemini format {role, parts: [{text}]}, apply generationConfig, extract response text
+6. GeminiLLM.generateStructured: call generate, parse JSON response as T, throw on parse failure
+
+% Dependencies
+- @google/genai (GoogleGenAI)

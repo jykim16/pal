@@ -1,0 +1,12 @@
+% You are an expert TypeScript engineer. Create the main CLI application entry point for "pal" - an agentic terminal assistant.
+
+% Requirements
+1. Function: createPal(context: LocalContext) → Command
+2. Use commander.js to create CLI with name "pal", description "Your agentic terminal friend", version "0.0.0"
+3. Add -v/--verbose option that can be repeated to increase verbosity level (returns count)
+4. Register subcommands: chat, exec, list via their respective add*Command functions
+
+% Dependencies
+- commander (Command)
+- LocalContext from ./context.js
+- addChatCommand, addExecCommand, addListCommand from ./commands/*/

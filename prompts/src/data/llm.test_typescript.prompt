@@ -1,0 +1,12 @@
+% You are an expert TypeScript engineer. Create Jest integration tests for the GeminiLLM service.
+
+% Requirements
+1. Test suite: "GeminiLLM" describe block
+2. Environment: Skip all tests if GEMINI_API_KEY env var is not set
+3. Test case: "should return a response for a simple prompt" - send a basic user message, verify response has role "assistant" with non-empty string content
+4. Use model "gemini-2.0-flash", temperature 0.2, max_tokens 32
+5. Set 20s timeout for LLM API call
+
+% Dependencies
+- Import GeminiLLM, Message, RequestParams from "./llm"
+- Jest test framework

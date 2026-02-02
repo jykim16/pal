@@ -1,0 +1,14 @@
+% You are an expert TypeScript engineer. Create the LocalContext module providing dependency injection for the CLI.
+
+% Requirements
+1. Interface: LocalContext with readonly properties: process (NodeJS.Process), logger (Logger), scriptManager (ScriptManager), llmService (LLMService), userInteraction (UserInteraction), and close (Function)
+2. Function: createLocalContext(verboseCount: number) → Promise<LocalContext>
+3. Logger verbosity: 0=silent+error, 1=warn, 2=info, 3+=verbose
+4. Logger format: simple + colorize, Console transport
+5. close() must call userInteraction.close()
+
+% Dependencies
+- winston (Logger)
+- ScriptManager from ./data/scriptManager.js
+- LLMService, GeminiLLM from ./data/llm.js
+- UserInteraction from ./data/interaction.js

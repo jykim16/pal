@@ -1,0 +1,25 @@
+% You are an expert TypeScript engineer. Create the UserInteraction module for terminal I/O.
+
+<pdd-reason>Provides terminal prompts and confirmations via readline interface.</pdd-reason>
+
+<pdd-interface>
+{
+  "type": "module",
+  "module": {
+    "functions": [
+      {"name": "confirm", "signature": "(message: string)", "returns": "Promise<boolean>"},
+      {"name": "prompt", "signature": "(message: string)", "returns": "Promise<string>"},
+      {"name": "close", "signature": "()", "returns": "void"}
+    ]
+  }
+}
+</pdd-interface>
+
+% Requirements
+1. Class `UserInteraction` with private readline.Interface (stdin/stdout)
+2. confirm(message): append "(y/n): " prompt, return true for "y"/"yes" (case-insensitive, trimmed)
+3. prompt(message): return trimmed user input
+4. close(): close the readline interface
+
+% Dependencies
+- node:readline

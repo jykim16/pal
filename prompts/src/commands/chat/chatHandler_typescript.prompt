@@ -1,0 +1,70 @@
+% You are an expert TypeScript engineer. Create the chatHandler module for the `pal chat` command.
+
+<include>.content/typescript_preamble.prompt</include>
+
+<pdd-reason>Handles chat command logic: routes prompts to existing scripts or generates new ones via LLM.</pdd-reason>
+
+<pdd-interface>
+{
+  "type": "module",
+  "module": {
+    "functions": [
+      {"name": "chatHandler", "signature": "(options: ChatOptions)", "returns": "Promise<void>"}
+    ]
+  }
+}
+</pdd-interface>
+
+<pdd-dependency>context_typescript.prompt</pdd-dependency>
+<pdd-dependency>scriptManager_typescript.prompt</pdd-dependency>
+<pdd-dependency>llm_typescript.prompt</pdd-dependency>
+<pdd-dependency>interaction_typescript.prompt</pdd-dependency>
+
+% Requirements
+1. Interface: ChatOptions with prompt (string), vibe (optional boolean), context (LocalContext)
+2. Export default async chatHandler(options: ChatOptions): Promise<void>
+3. No prompt: write "Interactive mode not yet implemented" to stdout, return
+4. Vibe mode: write "Vibe mode not yet implemented" to stdout, return
+5. Prompt mode: call handlePromptMode to process the prompt
+
+% Prompt Mode Flow
+1. Use LLM to determine action: 'execute_existing', 'generate_new', or 'clarify'
+2. Find relevant scripts via scriptManager.findRelevantScripts
+3. If no relevant scripts, return { type: 'generate_new' }
+4. If scripts exist, send decision prompt to LLM asking which action to take
+5. ActionResult type: { type, scriptName?, message? }
+
+% Execute Existing Script
+1. Retrieve script from manifest via scriptManager.getCommandManifestEntry
+2. Determine arguments using LLM if script has parameters
+3. Build exec command: `pal exec --path ${name}` with optional `--args "${args}"`
+4. Display script info and ask user for confirmation via userInteraction.confirm
+5. On confirm: execute via scriptManager.executeCommand
+6. On cancel: write "Execution cancelled." to stdout
+
+% Generate New Script
+1. Write "No relevant script found. Generating a new script..." to stdout
+2. Use LLM to generate bash script content from prompt
+3. Generate script name via scriptManager.generateScriptName
+4. Use LLM to generate description from script content
+5. Save script via scriptManager.saveScript
+6. Display generated script: name, description, path, content
+7. Ask user for confirmation to execute
+8. On confirm: execute script from ~/.pal/command/ path
+9. On cancel: write "Execution cancelled." to stdout
+
+% Clarify Action
+Write the clarification message to stdout with newline
+
+% Error Handling
+1. Wrap handlePromptMode in try/catch, write errors to stderr
+2. Wrap LLM calls in try/catch with fallback behavior
+3. LLM decision fallback: use first relevant script or generate_new
+4. LLM argument fallback: return null
+
+% Dependencies
+- type Command from ../../data/scriptManager.js
+- type LocalContext from ../../context.js
+- LLMService (via context.llmService)
+- ScriptManager (via context.scriptManager)
+- UserInteraction (via context.userInteraction)

@@ -1,0 +1,32 @@
+% You are an expert TypeScript engineer. Create the chat command registration.
+
+<include>.content/typescript_preamble.prompt</include>
+
+<pdd-reason>Registers the `pal chat` subcommand with Commander.js.</pdd-reason>
+
+<pdd-interface>
+{
+  "type": "module",
+  "module": {
+    "functions": [
+      {"name": "addChatCommand", "signature": "(pal: Command, context: LocalContext)", "returns": "Command"}
+    ]
+  }
+}
+</pdd-interface>
+
+<pdd-dependency>chatHandler_typescript.prompt</pdd-dependency>
+<pdd-dependency>context_typescript.prompt</pdd-dependency>
+
+% Requirements
+1. Function: `addChatCommand(pal: Command, context: LocalContext): Command`
+2. Command name: "chat"
+3. Description: "Chat with pal AI to generate and execute commands"
+4. Option: `--vibe` (execute without confirmation)
+5. Argument: `[prompt...]` variadic, joined with space
+6. Action: call chatHandler with { prompt, vibe, context }
+
+% Dependencies
+- Commander.js Command type
+- chatHandler from ./chatHandler
+- LocalContext type from ../../context

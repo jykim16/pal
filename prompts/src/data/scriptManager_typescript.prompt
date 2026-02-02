@@ -1,0 +1,16 @@
+% You are an expert TypeScript engineer. Create the ScriptManager module for managing and executing user-defined shell scripts.
+
+% Requirements
+1. Interfaces: Command {name, path, description, parameters: Record<string, string>, tags?: string[]}, CommandManifest {commands: {[path:string]: Command}, lastUpdated: string}
+2. Class: ScriptManager with private constructor; use static async create() factory pattern
+3. Storage: commands in ~/.pal/command/ directory, manifest in .commandManifest.json
+4. Methods: getCommandManifestEntry(path) → Command | undefined, getAllCommands() → Command[]
+5. Method: findRelevantScripts(prompt, llmService) → Promise<Command[]> - use LLM to match relevant scripts, fallback to substring matching on failure
+6. Method: addCommand(entry) → Promise<void> - persist command to manifest with updated timestamp
+7. Method: executeCommand(command, context) → Promise<void> - spawn bash with inherited stdio, reject on non-zero exit
+8. Method: saveScript(scriptName, description, scriptContent, context) → Promise<string> - write executable file and register command
+9. Method: generateScriptName(prompt) → string - create "bash/" prefixed camelCase name from prompt words
+
+% Dependencies
+- node:fs, node:path, node:os, node:child_process (spawn)
+- LocalContext from ../context.js
